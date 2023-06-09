@@ -15,7 +15,15 @@ const options = {
   time_24hr: true,
   defaultDate: new Date(),
   minuteIncrement: 1,
-  onClose(selectedDates) {},
+  onClose(selectedDates) {
+    const currentData = new Date();
+
+    if (selectedDates[0] < currentData) {
+      window.alert('Please choose a date in the future');
+    } else {
+      refs.btn.disabled = false;
+    }
+  },
 };
 
 const fp = flatpickr(refs.datetime, options);
@@ -24,6 +32,7 @@ let timer = { days: 0, hours: 0, minutes: 0, seconds: 0 };
 
 function changeTimer() {
   const selectedDates = fp.selectedDates;
+  refs.btn.disabled = true;
 
   if (selectedDates.length > 0) {
     const currentDate = new Date();
@@ -32,10 +41,14 @@ function changeTimer() {
     console.log(timer);
   }
 
-  setInterval(() => {
+  const idInterval = setInterval(() => {
     const currentDate = new Date();
     const diff = selectedDates[0] - currentDate;
     timer = convertMs(diff);
+    if (diff < 0) {
+      clearInterval(idInterval);
+      return;
+    }
     addLeadingZero(timer);
   }, 1000);
 }
@@ -57,7 +70,7 @@ function convertMs(ms) {
 }
 
 function addLeadingZero({ days, hours, minutes, seconds }) {
-  refs.days.textContent = String(days);
+  refs.days.textContent = String(days).padStart(2, 0);
   refs.hours.textContent = String(hours).padStart(2, 0);
   refs.minutes.textContent = String(minutes).padStart(2, 0);
   refs.seconds.textContent = String(seconds).padStart(2, 0);
